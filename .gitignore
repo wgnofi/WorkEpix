@@ -1,0 +1,37 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Built application files
+*.apk
+*.apks
+
+# Files for the Gradle build system
+.gradle/
+build/
+
+# IntelliJ project files
+.idea/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Firebase configuration (MUST EXCLUDE)
+google-services.json
+
+# Android Studio specific backup files
+*.asv
+*.swp
