@@ -49,6 +49,7 @@ fun HomeNavHost(
             modifier = Modifier.padding(innerPadding)) {
             composable(route = HomeDestinations.Home) {
                 ProtocolScreen(
+                    navController,
                     user = user,
                     onProfileClick = {
                         navController.navigate(HomeDestinations.Profile)
@@ -88,14 +89,12 @@ fun HomeNavHost(
                 }
             }
             composable(route = HomeDestinations.Health) {
-                HealthPolicyScreen {
-                    navController.popBackStack()
-                }
+                HealthPolicyScreen(onBack = { navController.popBackStack()})
             }
             composable(route = HomeDestinations.Overtime) {
-                OvertimePolicyScreen {
+                OvertimePolicyScreen(onBack = {
                     navController.popBackStack()
-                }
+                })
             }
         }
     }

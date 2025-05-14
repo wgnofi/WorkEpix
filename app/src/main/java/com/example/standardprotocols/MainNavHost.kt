@@ -54,7 +54,7 @@ fun MainNavHost(
     val navController = rememberNavController()
     val screens = listOf(MainNav.Home, MainNav.Announcement)
     var currentScreen by rememberSaveable {
-        mutableStateOf(navController.currentDestination?.route ?: "login")
+        mutableStateOf("home")
     }
     Scaffold(
         topBar = { Text("") },
@@ -64,7 +64,13 @@ fun MainNavHost(
                         NavigationBarItem(
                             selected = currentScreen == screen.route,
                             onClick = {
-                                navController.navigate(screen.route)
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                                 currentScreen = screen.route
                             },
                             icon = {

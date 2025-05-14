@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -32,11 +33,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.standardprotocols.R
+import com.example.standardprotocols.data.IssueListResult
+import com.example.standardprotocols.ui.screens.home.employee.IssueViewModel
 import com.example.standardprotocols.ui.theme.StandardProtocolsTheme
 
 @Composable
 fun ManagerHomeScreen(
+    issueViewModel: IssueViewModel,
     onPendingLeaveReqClick: () -> Unit,
     onApprovedLeave: () -> Unit,
     onRejectedLeave: () -> Unit,
@@ -44,6 +49,7 @@ fun ManagerHomeScreen(
     onFixedIssues: () -> Unit,
     onProfileClick: () -> Unit
 ) {
+    val count by issueViewModel.issueCountForUser.collectAsStateWithLifecycle()
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -90,7 +96,7 @@ fun ManagerHomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text("Active Issues")
-                        Text("0", fontSize = 75.sp, fontWeight = FontWeight.SemiBold)
+                        Text(count.toString(), fontSize = 75.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -198,34 +204,8 @@ fun ManagerHomeScreen(
                         contentDescription = null
                     )
                 }
-                HorizontalDivider()
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            onClick = onFixedIssues
-                        )
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Fixed Issues")
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
-                        contentDescription = null
-                    )
-                }
             }
         }
     }
 }
 
-@Preview
-@Composable
-fun ManagerHomeScreenPreview() {
-    StandardProtocolsTheme(true) {
-        Surface {
-            ManagerHomeScreen({}, {}, {}, {}, {}, {})
-        }
-    }
-}

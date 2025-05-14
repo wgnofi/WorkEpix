@@ -1,10 +1,14 @@
 package com.example.standardprotocols.data
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlin.Result
 
 sealed interface IssueResult {
     data object Loading : IssueResult
@@ -21,6 +25,8 @@ sealed interface IssueListResult {
 interface IssueRepository {
     suspend fun submitIssue(issue: Issue): Flow<IssueResult>
     suspend fun getIssueListForUserOnce(id: String): Flow<IssueListResult>
+    suspend fun fixIssue(issueId: String): Flow<Result<Unit>>
+    suspend fun activeIssuesForManager(id: String): Flow<IssueListResult>
 }
 
 
@@ -57,6 +63,40 @@ class FirebaseIssueRepository @Inject constructor(
         } catch (e: Exception) {
             emit(IssueListResult.Error("Failed to fetch issues for current user."))
         }
+    }
+
+    override suspend fun fixIssue(issueId: String): Flow<Result<Unit>> = flow {
+        try {
+            issueCollection.document(issueId)
+                .update("status", "Fixed")
+                .await()
+            emit(Result.success(Unit))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    override suspend fun activeIssuesForManager(id: String): Flow<IssueListResult> = callbackFlow {
+        val query = issueCollection
+            .whereEqualTo("managerId", id)
+            .whereEqualTo("status", "Raised")
+
+        val listenerRegister = query.addSnapshotListener { snap, error ->
+            if (error != null) {
+                Log.e("LEAVE", "Error fetching active issues: ${error.message}", error)
+                trySend(IssueListResult.Error("Failed to fetch active issues.")).isFailure
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if (snap != null) {
+                val issues = snap.documents.mapNotNull { documentSnapshot ->
+                    documentSnapshot.toObject(Issue::class.java)?.copy(id = documentSnapshot.id)
+                }
+                trySend(IssueListResult.Success(issues)).isSuccess
+            }
+        }
+        awaitClose { listenerRegister.remove() }
     }
 }
 fun Issue.toHashMap(): HashMap<String, String?> {

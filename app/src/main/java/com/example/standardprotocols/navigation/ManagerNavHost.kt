@@ -43,6 +43,7 @@ fun ManagerNavHost(
             modifier = Modifier.padding(innerPadding)) {
             composable(route = MDestinations.HOME) {
                 ManagerHomeScreen(
+                    issueViewModel,
                     onPendingLeaveReqClick = {
                     mNavController.navigate(MDestinations.LEAVE_PENDING)
                 }, onIssueClick = {
@@ -66,9 +67,10 @@ fun ManagerNavHost(
                 }, leaveViewModel)
             }
             composable(route = MDestinations.ISSUE) {
-                ManagerISScreen {
+                ManagerISScreen( {
                     mNavController.popBackStack()
-                }
+                },
+                    issueViewModel)
             }
             composable(route = MDestinations.PROFILE) {
                 MProfileScreen({

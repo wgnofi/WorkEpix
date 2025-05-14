@@ -3,6 +3,7 @@ package com.example.standardprotocols.ui.screens.home.manager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,6 +41,7 @@ fun MProfileScreen(
         }
         ElevatedButton(onSignOut, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text("Log out")
+            Spacer(modifier = Modifier.padding(8.dp))
             Icon(imageVector = Icons.AutoMirrored.Default.ExitToApp, contentDescription = null)
         }
     }

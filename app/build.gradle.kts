@@ -49,6 +49,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
     // Add the dependency for the Firebase Authentication library
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation(libs.firebase.appcheck.playintegrity)

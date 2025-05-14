@@ -1,5 +1,6 @@
 package com.example.standardprotocols.ui.screens.home.employee
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.standardprotocols.R
 import com.example.standardprotocols.common.TopBar
+import com.example.standardprotocols.data.Issue
 import com.example.standardprotocols.data.Leave
 import com.example.standardprotocols.data.User
 import com.example.standardprotocols.ui.screens.login.UserViewModel
@@ -59,16 +62,19 @@ fun ProfileScreen(
 ) {
     val managerName by userViewModel.managerName.collectAsStateWithLifecycle()
     val leaveList by leaveViewModel.leaveList.collectAsStateWithLifecycle()
+    val issueList by issueViewModel.issues.collectAsStateWithLifecycle()
+    val count by issueViewModel.issueCountForUser.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
-    var count by rememberSaveable {
-        mutableIntStateOf(0)
-    }
     var bottomSheetState by rememberSaveable {
         mutableStateOf(false)
     }
+    var issueSheetState by rememberSaveable {
+        mutableStateOf(false)
+    }
     LaunchedEffect(Unit) {
-        count = issueViewModel.getRaisedIssuesCount(user?.uid!!)
+        issueViewModel.getRaisedIssuesCount(user?.uid!!)
         leaveViewModel.getLeaveListForUser(user.uid)
+        issueViewModel.getRaisedIssues(user.uid)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -117,7 +123,9 @@ fun ProfileScreen(
                             RowFill("Reporting to:", "$managerName")
                         }
                     }
-                    RaisedIssues(count)
+                    RaisedIssues(count, onClick = {
+                        issueSheetState = true
+                    })
                     LeavesTaken { bottomSheetState = true }
                     LogOut(onLogOut)
                     Text(
@@ -130,30 +138,98 @@ fun ProfileScreen(
                     )
                 }
             }
+
         if (bottomSheetState) {
             Column(modifier = Modifier.fillMaxSize()) {
                 ModalBottomSheet(onDismissRequest = {bottomSheetState = false}) {
-                    leaveList.forEach {
-                        LeaveCard(it)
+                    Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+                        leaveList.forEach {
+                            LeaveCard(it)
+                        }
+                    }
+                }
+            }
+        }
+        if (issueSheetState) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                ModalBottomSheet(onDismissRequest = { issueSheetState = false }) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+                    ) {
+                        if (issueList.isEmpty()) {
+                            Text("Empty")
+                        }
+                        else {
+                            issueList.forEach {
+                                IssueCard(it)
+                            }
+                        }
                     }
                 }
             }
         }
         }
+
 }
 
 @Composable
 fun LeaveCard(l: Leave) {
     ElevatedCard(modifier = Modifier
         .fillMaxWidth()
-        .padding(16.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp),
+        .padding(16.dp)
+        .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(l.date.toString(), fontSize = 18.sp)
+            Text("Applied Leave for:", fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
             Icon(painter = painterResource(getDrawable(l.status.toString())), contentDescription = null)
         }
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(getFormattedDate(l.date.toString()), fontSize = 18.sp)
+            Text(l.status.toString() + " by your Manager")
+        }
     }
+}
+
+@Composable
+fun IssueCard(issue: Issue) {
+    ElevatedCard(modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp)
+        .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Issue:")
+            Text(issue.title?: "Not Found")
+        }
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Status:")
+            Text(issue.status?: "Not Found")
+        }
+    }
+}
+
+fun getFormattedDate(d: String): String {
+    val contents = d.split(" ")
+    val day = contents[0]
+    val month = contents[1]
+    val date = contents[2]
+    val year = contents.last()
+
+    return "$day $month $date $year"
 }
 
 fun getDrawable(status: String):Int {
@@ -225,9 +301,10 @@ fun LogOut(
 }
 @Composable
 fun RaisedIssues(
-    count: Int
+    count: Int,
+    onClick: () -> Unit
 ) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp),
+    ElevatedCard(onClick = onClick,modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp),
         elevation = CardDefaults.elevatedCardElevation(3.dp)) {
         Column(modifier = Modifier
             .fillMaxWidth()
@@ -238,6 +315,7 @@ fun RaisedIssues(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("You've raised $count Issues")
+                Icon(imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight, contentDescription = null)
             }
         }
     }
