@@ -17,7 +17,7 @@
 - **Language**: Kotlin
 
 ## Get Started ⚡
-1. Clone this repo: `git clone https://github.com/your-repo/workepix.git`
+1. Clone this repo: `https://github.com/wgnofi/WorkEpix.git`
 2. Open in **Android Studio**.
 3. Set up a **Firebase project** (Firestore + Auth).
 4. Add `google-services.json` to `app/`.
