@@ -23,6 +23,22 @@
 4. Add `google-services.json` to `app/`.
 5. Build & run on an Android device/emulator (API 21+).
 
+## Note 📝
+
+In [GenerativeModelModule.kt](https://github.com/wgnofi/WorkEpix/blob/main/app/src/main/java/com/example/standardprotocols/di/GenerativeModelModule.kt) Don't Forget to include your API KEY!
+
+```
+fun provideGenerativeModel(): GenerativeModel {
+        val apiKey = "YOUR_API_KEY"
+        return GenerativeModel(
+            modelName = "gemini-2.0-flash",
+            apiKey = apiKey
+        )
+    }
+```
+
+and Include your own firebase JSON configuration file in the root (app level) of android project !
+
 ## Screenshots 📸
 
 ![s1](https://github.com/user-attachments/assets/fc0820b2-24f8-4655-bd24-2470d26a697c)
